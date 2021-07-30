@@ -1,29 +1,34 @@
 import socket
 
 
-def enviar_cadena():
-    mensaje = input("Escriba el mensaje que desea enviar: ")
-    return enviar_cadena_segura(mensaje)
 
 
-def enviar_cadena_segura(mensaje):
-    return agregar_ruido(mensaje)
+class Emisor(object):
+
+    def __init__(self):
+        self.mensaje = ''
+        self.mensaje_ruidoso = ''
+
+    def enviar_cadena(self):
+        self.mensaje = input("Escriba el mensaje que desea enviar: ")
+
+    def enviar_cadena_segura(self):
+        return self.mensaje
+
+    def agregar_ruido(self):
+        pass
+
+    def enviar_objeto(self):
+        return self.mensaje_ruidoso
 
 
-def agregar_ruido(mensaje):
-    mensaje_ruidoso = mensaje
-    return enviar_objeto(mensaje_ruidoso)
-
-
-def enviar_objeto(mensaje_ruidoso):
-    return mensaje_ruidoso
-
-
+emisor = Emisor()
 
 while True:
     print("Menu:")
     opcion = int(input("""
-    1. Enviar mensaje
+    1. Escribir mensaje
+    2. Enviar mensaje
     0. Salir
     """))
 
@@ -31,16 +36,16 @@ while True:
         print("Bye")
         exit()
     elif opcion == 1:
-        enviar_cadena()
-
+        emisor.enviar_cadena()
+    elif opcion == 2:
         s = socket.socket()
         localhost_ip = "localhost"
         port = 80
 
         s.connect((localhost_ip, port))
 
-        print(s.recv(1024))
-        s.close()
+        s.send(b'HOLA')
 
+        s.close()
     else:
         pass

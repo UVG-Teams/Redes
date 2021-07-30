@@ -31,5 +31,6 @@ while True:
     c, addr = s.accept()
 
     print("Got connection from", addr)
-    c.send(b"Thank you for connecting")
+    print(c.recv(1024))
+
     c.close()
