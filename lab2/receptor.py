@@ -5,9 +5,10 @@ from bitarray import bitarray
 class Receptor(object):
 
     def __init__(self, socket):
-        self.mensaje = None
-        self.mensaje_ruidoso = None
         self.socket = socket
+        self.mensaje = None
+        self.mensaje_decodificado = None
+        self.mensaje_ruidoso = None
 
     def recibir_objeto(self):
         # Transmision
@@ -19,21 +20,34 @@ class Receptor(object):
 
     def codificacion(self):
         # Codificacion
-        self.mensaje = self.mensaje_ruidoso
+        mensaje = bitarray()
+        mensaje.frombytes(self.mensaje_ruidoso)
+        try:
+            self.mensaje_decodificado = mensaje.tobytes().decode('ascii')
+        except:
+            self.mensaje_decodificado = "Imposible decodificar"
 
     def recibir_cadena_segura(self):
         # Verificacion
-        mensaje = bitarray()
-        mensaje.frombytes(self.mensaje)
-        try:
-            self.mensaje = mensaje.tobytes().decode('ascii')
-        except:
-            self.mensaje = "Imposible decodificar"
-
+        self.detectar_errores()
+        self.corregir_errores()
+        self.mensaje = self.mensaje_corregido
 
     def recibir_cadena(self):
         # Aplicacion
         print(self.mensaje)
+
+    def detectar_errores(self, algoritmo='fletcher-checksum'):
+        if algoritmo == 'fletcher-checksum':
+            self.mensaje_analizado = self.mensaje_decodificado
+        else:
+            self.mensaje_analizado = self.mensaje_decodificado
+
+    def corregir_errores(self, algoritmo='hamming'):
+        if algoritmo == 'hamming':
+            self.mensaje_corregido = self.mensaje_analizado
+        else:
+            self.mensaje_corregido = self.mensaje_analizado
 
 
 s = socket.socket()
