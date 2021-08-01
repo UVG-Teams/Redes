@@ -1,15 +1,18 @@
 import socket
+import random
 from bitarray import bitarray
 
 
 class Emisor(object):
 
     def __init__(self):
-        self.mensaje = None
-        self.mensaje_ruidoso = None
         self.socket = None
         self.localhost_ip = "localhost"
         self.port = 80
+        self.probabilidad = 1
+        self.mensaje = None
+        self.mensaje_binario = None
+        self.mensaje_ruidoso = None
 
     def enviar_cadena(self):
         # Aplicacion
@@ -17,13 +20,19 @@ class Emisor(object):
 
     def enviar_cadena_segura(self):
         # Verificacion
-        self.mensaje = bitarray(self.mensaje)
+        mensaje_ascii = self.mensaje.encode('ascii')
+        self.mensaje_binario = bitarray()
+        self.mensaje_binario.frombytes(mensaje_ascii)
 
     def agregar_ruido(self):
         # Ruido
-        self.mensaje_ruidoso = self.mensaje
-        print(self.mensaje_ruidoso)
-        print(self.mensaje_ruidoso.tobytes())
+        mensaje_ruidoso = ''
+        for bit in self.mensaje_binario.to01():
+            num_random = random.randint(0, 100)
+            if num_random in [i for i in range(0, self.probabilidad)]:
+                bit = '0' if bit == '1' else '1'
+            mensaje_ruidoso += str(bit)
+        self.mensaje_ruidoso = bitarray(mensaje_ruidoso)
 
     def enviar_objeto(self):
         # Transmision
@@ -36,19 +45,7 @@ class Emisor(object):
 emisor = Emisor()
 
 while True:
-    print("Menu:")
-    opcion = int(input("""
-    1. Enviar mensaje
-    0. Salir
-    """))
-
-    if opcion == 0:
-        print("Bye")
-        exit()
-    elif opcion == 1:
-        emisor.enviar_cadena()
-        emisor.enviar_cadena_segura()
-        emisor.agregar_ruido()
-        emisor.enviar_objeto()
-    else:
-        pass
+    emisor.enviar_cadena()
+    emisor.enviar_cadena_segura()
+    emisor.agregar_ruido()
+    emisor.enviar_objeto()

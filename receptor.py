@@ -23,10 +23,13 @@ class Receptor(object):
 
     def recibir_cadena_segura(self):
         # Verificacion
-        print(self.mensaje)
         mensaje = bitarray()
         mensaje.frombytes(self.mensaje)
-        self.mensaje = mensaje.to01()
+        try:
+            self.mensaje = mensaje.tobytes().decode('ascii')
+        except:
+            self.mensaje = "Imposible decodificar"
+
 
     def recibir_cadena(self):
         # Aplicacion
