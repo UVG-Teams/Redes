@@ -1,21 +1,36 @@
 import socket
+from bitarray import bitarray
 
 
-def recibir_objeto(mensaje_ruidoso):
-    return recibir_cadena_segura(mensaje_ruidoso)
+class Receptor(object):
 
+    def __init__(self, socket):
+        self.mensaje = None
+        self.mensaje_ruidoso = None
+        self.socket = socket
 
-def codificacion(mensaje_ruidoso):
-    mensaje = mensaje_ruidoso
-    return recibir_cadena_segura(mensaje)
+    def recibir_objeto(self):
+        # Transmision
+        # self.mensaje_ruidoso = mensaje_ruidoso
+        c, addr = self.socket.accept()
+        print("Got connection from", addr)
+        self.mensaje_ruidoso = c.recv(1024)
+        c.close()
 
+    def codificacion(self):
+        # Codificacion
+        self.mensaje = self.mensaje_ruidoso
 
-def recibir_cadena_segura(mensaje):
-    return recibir_cadena(mensaje)
+    def recibir_cadena_segura(self):
+        # Verificacion
+        print(self.mensaje)
+        mensaje = bitarray()
+        mensaje.frombytes(self.mensaje)
+        self.mensaje = mensaje.to01()
 
-
-def recibir_cadena(mensaje):
-    return mensaje
+    def recibir_cadena(self):
+        # Aplicacion
+        print(self.mensaje)
 
 
 s = socket.socket()
@@ -27,10 +42,10 @@ print ("Socket binded to %s" %(port))
 s.listen(5)
 print ("Socket is listening")
 
+receptor = Receptor(s)
+
 while True:
-    c, addr = s.accept()
-
-    print("Got connection from", addr)
-    print(c.recv(1024))
-
-    c.close()
+    receptor.recibir_objeto()
+    receptor.codificacion()
+    receptor.recibir_cadena_segura()
+    receptor.recibir_cadena()
