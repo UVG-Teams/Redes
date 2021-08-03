@@ -19,10 +19,31 @@ class Emisor(object):
         self.message = None
         self.alg = 'fletcher'
         # self.alg = 'hamming'
+        self.posibles_mensajes = [
+            'hola',
+            'como estas?',
+            'adios',
+            'que hubo',
+            'que tal?',
+            'como has estado?',
+            'que onda?',
+            'ola k ase',
+            'dinosaurio',
+            'hercules',
+            'supercalifrajilisticoespialidoso',
+            'heracles',
+            'cartas',
+            'magia',
+            'computadora',
+            'apple',
+            'lluvia',
+            'redes',
+        ]
 
     def enviar_cadena(self):
         # Aplicacion
-        self.mensaje = input("Escriba el mensaje que desea enviar: ")
+        # self.mensaje = input("Escriba el mensaje que desea enviar: ")
+        self.mensaje = random.choice(self.posibles_mensajes)
 
     def enviar_cadena_segura(self):
         # Verificacion

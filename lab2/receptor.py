@@ -3,6 +3,7 @@ import pickle
 import hamming
 from message import Message
 from bitarray import bitarray
+import matplotlib.pyplot as plt
 
 
 class Receptor(object):
@@ -17,6 +18,7 @@ class Receptor(object):
         self.message = None
         self.alg = 'fletcher'
         # self.alg = 'hamming'
+        self.efectividad = []
 
     def recibir_objeto(self):
         # Transmision
@@ -40,16 +42,25 @@ class Receptor(object):
                     print(bitarray(self.mensaje_binario).tobytes().decode('ascii'))
                     self.corregir_errores()
                     self.mensaje = self.mensaje_corregido
+                    self.efectividad.append('Detectado')
                 except:
                     self.mensaje_corregido = None
                     self.mensaje = "Imposible de decodificar"
+                    self.efectividad.append('Fallido')
             else:
                 self.mensaje_corregido = None
                 self.mensaje = bitarray(self.mensaje_binario).tobytes().decode('ascii')
+                self.efectividad.append('Sin ruido')
         elif self.alg == 'hamming':
-            self.mensaje_binario = self.hamming_alg(self.mensaje_ruidoso).to01()
-            self.corregir_errores()
-            self.mensaje = self.mensaje_corregido
+            try:
+                self.mensaje_binario = self.hamming_alg(self.mensaje_ruidoso).to01()
+                self.corregir_errores()
+                self.mensaje = self.mensaje_corregido
+                self.efectividad.append('Corregido')
+            except:
+                self.mensaje_corregido = None
+                self.mensaje = "Imposible de decodificar"
+                self.efectividad.append('Fallido')
 
     def corregir_errores(self):
         self.mensaje_corregido = bitarray(self.mensaje_binario).tobytes().decode('ascii')
@@ -96,8 +107,28 @@ print ("Socket is listening")
 
 receptor = Receptor(s)
 
-while True:
+for i in range(1000):
     receptor.recibir_objeto()
     receptor.codificacion()
     receptor.recibir_cadena_segura()
     receptor.recibir_cadena()
+
+
+# Graficas
+labels = set(receptor.efectividad)
+labels_count = {}
+sizes = []
+
+for i in labels:
+    labels_count[i] = 0
+
+for i in receptor.efectividad:
+    labels_count[i] += 1
+
+[sizes.append(int(i)) for i in labels_count.values()]
+
+fig1, ax1 = plt.subplots()
+ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+ax1.axis('equal')
+plt.show()
+input()
