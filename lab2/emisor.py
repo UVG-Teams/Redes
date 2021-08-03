@@ -1,6 +1,7 @@
 import socket
 import random
 import pickle
+import hamming
 from message import Message
 from bitarray import bitarray
 
@@ -16,6 +17,8 @@ class Emisor(object):
         self.mensaje_codificado = None
         self.mensaje_ruidoso = None
         self.message = None
+        self.alg = 'fletcher'
+        # self.alg = 'hamming'
 
     def enviar_cadena(self):
         # Aplicacion
@@ -26,9 +29,11 @@ class Emisor(object):
         mensaje_ascii = self.mensaje.encode('ascii')
         self.mensaje_codificado = bitarray()
         self.mensaje_codificado.frombytes(mensaje_ascii)
-
         self.message = Message()
-        self.message.verificador = self.fletcher32(self.mensaje_codificado.to01())
+        if self.alg == 'fletcher':
+            self.message.verificador = self.fletcher32(self.mensaje_codificado.to01())
+        elif self.alg == 'hamming':
+            self.mensaje_codificado = self.hamming_alg(self.mensaje_codificado.to01())
 
     def agregar_ruido(self):
         # Ruido
@@ -50,6 +55,9 @@ class Emisor(object):
 
         self.socket.send(mensaje_serializado)
         self.socket.close()
+
+    def hamming_alg(self, message):
+        return hamming.encode(bitarray(message))
 
     def fletcher32(self, message):
         w_len = len(message)

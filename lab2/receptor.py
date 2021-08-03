@@ -1,5 +1,6 @@
 import socket
 import pickle
+import hamming
 from message import Message
 from bitarray import bitarray
 
@@ -14,6 +15,8 @@ class Receptor(object):
         self.mensaje_binario = None
         self.mensaje_corregido = None
         self.message = None
+        self.alg = 'fletcher'
+        # self.alg = 'hamming'
 
     def recibir_objeto(self):
         # Transmision
@@ -30,19 +33,23 @@ class Receptor(object):
 
     def recibir_cadena_segura(self):
         # Verificacion
-        if self.fletcher32(self.mensaje_binario) != self.message.verificador:
-            try:
-                print("Mensaje con ruido, corrigiendo...")
-                print(bitarray(self.mensaje_binario).tobytes().decode('ascii'))
-                self.corregir_errores()
-                self.mensaje = self.mensaje_corregido
-            except:
+        if self.alg == 'fletcher':
+            if self.fletcher32(self.mensaje_binario) != self.message.verificador:
+                try:
+                    print("Mensaje con ruido, corrigiendo...")
+                    print(bitarray(self.mensaje_binario).tobytes().decode('ascii'))
+                    self.corregir_errores()
+                    self.mensaje = self.mensaje_corregido
+                except:
+                    self.mensaje_corregido = None
+                    self.mensaje = "Imposible de decodificar"
+            else:
                 self.mensaje_corregido = None
-                self.mensaje = "Imposible de decodificar"
-        else:
-            self.mensaje_corregido = None
-            self.mensaje = bitarray(self.mensaje_binario).tobytes().decode('ascii')
-
+                self.mensaje = bitarray(self.mensaje_binario).tobytes().decode('ascii')
+        elif self.alg == 'hamming':
+            self.mensaje_binario = self.hamming_alg(self.mensaje_ruidoso).to01()
+            self.corregir_errores()
+            self.mensaje = self.mensaje_corregido
 
     def corregir_errores(self):
         self.mensaje_corregido = bitarray(self.mensaje_binario).tobytes().decode('ascii')
@@ -50,6 +57,9 @@ class Receptor(object):
     def recibir_cadena(self):
         # Aplicacion
         print(self.mensaje)
+
+    def hamming_alg(self, message):
+        return hamming.decode(message)
 
     def fletcher32(self, message):
         w_len = len(message)
